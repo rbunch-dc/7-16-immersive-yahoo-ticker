@@ -11,19 +11,45 @@ $(document).ready(function(){
 		console.log(url);
 
 		$.getJSON(url, function(theDataJsFoundIfAny){
-			// console.log(theDataJsFoundIfAny);
-			var newHTML = '';
+			console.log(theDataJsFoundIfAny);
 			var stockInfo = theDataJsFoundIfAny.query.results.quote;
-			console.log(stockInfo);
-			newHTML = '<tr><td>' + stockInfo.Symbol + '</td>';
-			newHTML += '<td>' + stockInfo.Name  + '</td>';
-			newHTML += '<td>' + stockInfo.Ask + '</td>';
-			newHTML += '<td>' + stockInfo.Bid + '</td>';
-			newHTML += '<td>' + stockInfo.Change + '</td></tr>';
-			$('.yahoo-body').html(newHTML);
+			var stockCount = theDataJsFoundIfAny.query.count;
+			var newHTML = '';
+			if(stockCount > 1){
+				for(var i=0; i<stockInfo.length; i++){
+					newHTML += buildNewTable(stockInfo[i]);
+				}
+			}else{
+				newHTML += buildNewTable(stockInfo);
+			}
+			$('.yahoo-body').html(newHTML);	
+			$('.table').DataTable();
+
+$('.table').on( 'column-visibility.dt', function ( e, settings, column, state ) {
+    console.log(
+        'Column '+ column +' has changed to '+ (state ? 'visible' : 'hidden')
+    );
+} );
 
 		});
 
 	});
 
 });
+
+function buildNewTable(stockInfo){
+
+	if(stockInfo.Change[0] == '+'){
+		var upDown = "success";
+	}else if(stockInfo.Change[0] == '-'){
+		var upDown = "danger";
+	}
+
+	var htmlString = '';
+	htmlString = '<tr><td>' + stockInfo.Symbol + '</td>';
+	htmlString += '<td>' + stockInfo.Name  + '</td>';
+	htmlString += '<td>' + stockInfo.Ask + '</td>';
+	htmlString += '<td>' + stockInfo.Bid + '</td>';
+	htmlString += '<td class="'+upDown+'">' + stockInfo.Change + '</td></tr>';
+	return htmlString;
+}
